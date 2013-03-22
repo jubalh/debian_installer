@@ -1,4 +1,5 @@
-!/bin/bash
+#!/bin/bash
+
 #siehe http://tldp.org/LDP/abs/html/index.html
 #hilfe: https://github.com/ginatrapani/todo.txt-cli/blob/master/todo.sh
 
@@ -33,15 +34,23 @@ function usage(){
 function check_root(){
 	if [[ $(/usr/bin/id -u) -eq 0 ]]; then
 		IS_ROOT=1
+	else
+		IS_ROOT=0
 	fi
 }
 
 function git_clone() {
 	git clone $1 $2
-	if ($? != 0); then
+	if [[ $? -ne 0 ]]; then
+		echo "error while cloning"
 		echo "$*"
 		exit 1
 	fi
+}
+
+function done() {
+	echo "done"
+	echo ""
 }
 
 #MAIN
@@ -80,7 +89,7 @@ if [[ $MODE_INTERACTIVE -eq 1 ]]; then
 	echo "do you want to take a look at the modified sources.list?"
 	echo -n "y/n: "
 	read q
-	if [[ $q == "y" ]]
+	if [[ "$q" -eq "y" ]]; then
 		vim $SOURCES_LIST #TODO: editor variabel
 	fi
 fi
@@ -97,33 +106,38 @@ if [[ $MODE_INTERACTIVE -eq 1 ]]; then
 	echo "do you want to take a look at the packages list?"
 	echo "y/n: "
 	read q
-	if [[ ($q == "y") ]]; then
+	if [[ "$q" -eq "y" ]]; then
 		vim packages.lst
 	fi
 fi
 	echo "installing packages"
-	#TODO: check if file exists. exit 1 if not
-	#TODO: listen in packages.lst machen. basis, themes, etc.
-	apt-get install $(< packages.lst)
+	if [[ -e packages.lst ]]; then
+		apt-get install $(< packages.lst)
+	else
+		echo "packages.lst is missing"
+		exit 1
+	fi
 fi
 
 #create working dir
+echo "creating work directory "$DEST_FOLDER
 mkdir -p $DEST_FOLDER
 cd $DEST_FOLDER
 
 echo "cloning dotfiles..."
-git clone $REPO_DOTFILES $DEST_DOTFILES
-exec $DEST_DOTFILES/setup.sh
-echo "done"
+git_clone $REPO_DOTFILES $DEST_DOTFILES
+bash $DEST_DOTFILES/setup.sh #warum geht exec nicht?
+done
 
 echo "cloning vundle and setting up vim plugins depending on vimrc..."
 git_clone $REPO_VUNDLE $DEST_VUNDLE
-su $USR -c "vim +BundleInstall +qall" #TODO: oder vor allen ein su? aufpassen wegen rechten!
-echo "done"
+#su $USR -c "vim +BundleInstall +qall" #TODO: oder vor allen ein su? aufpassen wegen rechten!
+done
 #TODO: oder zsh plugin vundle nutzen
 
 #TODO: mehrere gute themes holen und am schluss setzen lassen. themes und icons als liste und oben definieren damit andere user einfach waehlen koennen? .git dir rausloeschen?
 #gtk theme
+echo "cloning greybird gtk theme..."
 git_clone $REPO_GTK_GREYBIRD $DEST_GTK_GREYBIRD
 if [[ $IS_ROOT -eq 1 ]]; then
 	mv $DEST_GTK_GREYBIRD /usr/share/themes #TODO: oder /usr/share/local/themes?
@@ -132,6 +146,7 @@ else
 fi
 
 #icons
+echo "cloning faenza icon theme..."
 git_clone $REPO_ICON_FAENZA $DEST_ICON_FAENZA
 if [[ $IS_ROOT -eq 1 ]]; then
 	mv $DEST_ICON_FAENZA /usr/share/icons
@@ -156,9 +171,6 @@ git_clone $REPO_OH_MY_ZSH $DEST_OH_MY_ZSH
 cp $DEST_OH_MY_ZSH"/templates/zshrc.zsh-template" $USR_HOME"/.zshrc"
 
 #bzw. echo "colorscheme indigo" >> $USR_HOME/.vimperatorrc
-
-#fuer eigene awesome config schaue hier: https://github.com/tony/awesome-config
-#als vorlage nehmen. gute idee mit personal.lua. aber unnoetiges zeugs raus
 
 #TODO: im interaktiv modus gtk theme switch prog oder so aufrufen
 #TODO: clean modus bauen der dann die git repos in $HOME/.awsetup loescht. so das nur noch die benoetigten dateien bleiben. oder dohc lieber auch diese nach ~/.dotfiles verschieben -n?
