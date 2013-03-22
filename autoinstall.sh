@@ -11,12 +11,15 @@ DEST_FOLDER=$USR_HOME/.jubaliansetup
 IS_ROOT=0
 MODE_INTERACTIVE=0
 
+#REPOSITORIES
 REPO_DOTFILES="https://github.com/jubalh/dotfiles.git"
 REPO_GTK_GREYBIRD="https://github.com/shimmerproject/Greybird"
 REPO_ICON_FAENZA="https://github.com/zhelyabuzhsky/faenza"
 REPO_LS_COLORS="https://github.com/seebi/dircolors-solarized"
 REPO_VUNDLE="https://github.com/gmarik/vundle.git"
 REPO_OH_MY_ZSH="git://github.com/robbyrussell/oh-my-zsh.git"
+
+#DESTINATIONS
 DEST_GTK_GREYBIRD="greybird"
 DEST_ICON_FAENZA="faenza"
 DEST_LS_COLORS="dircolors-solarized"
@@ -24,7 +27,8 @@ DEST_VUNDLE=$USR_HOME"/.vim/bundle/vundle"
 DEST_OH_MY_ZSH=$USR_HOME"/.oh-my-zsh/"
 DEST_DOTFILES=$USR_HOME"/.dotfiles"
 
-GIT_REPOS=(REPO_GTK_GREYBIRD REPO_ICON_FAENZA REPO_LS_COLORS REPO_AWESOME_THEMES)
+GIT_REPOS=($REPO_GTK_GREYBIRD $REPO_ICON_FAENZA $REPO_LS_COLORS $REPO_AWESOME_THEMES)
+DESTINATIONS=($DEST_DOTFILES $DEST_OH_MY_ZSH $DEST_VUNDLE)
 
 #FUNCTIONS
 function usage(){
@@ -39,6 +43,13 @@ function check_root(){
 	fi
 }
 
+function clean_up(){
+	for dest in "${DESTINATIONS[@]}"; do
+		echo "removing ${dest}"
+		rm -rf "${dest}"
+	done
+}
+
 function git_clone() {
 	git clone $1 $2
 	if [[ $? -ne 0 ]]; then
@@ -48,15 +59,16 @@ function git_clone() {
 	fi
 }
 
-function done() {
+function say_done() {
 	echo "done"
-	echo ""
+	echo 
 }
 
 #MAIN
-echo
+clear
+echo '######################'
 echo 'automatic setup script'
-echo
+echo '######################'
 
 check_root()
 if [[ $IS_ROOT -eq 0 ]]; then
@@ -85,31 +97,34 @@ if [[ $IS_ROOT -eq 1 ]]; then
 		echo "#Debian Mozilla team" >> $SOURCES_LIST
 		echo "deb http://your-mirror.debian.org/debian experimental main" >> $SOURCES_LIST #TODO: check correct uri
 	fi
-if [[ $MODE_INTERACTIVE -eq 1 ]]; then
-	echo "do you want to take a look at the modified sources.list?"
-	echo -n "y/n: "
-	read q
-	if [[ "$q" -eq "y" ]]; then
-		vim $SOURCES_LIST #TODO: editor variabel
+	if [[ $MODE_INTERACTIVE -eq 1 ]]; then
+		echo "do you want to take a look at the modified sources.list?"
+		echo -n "y/n: "
+		read q
+		if [[ "$q" -eq "y" ]]; then
+			vim $SOURCES_LIST #TODO: editor variabel
+		fi
 	fi
-fi
 
-#TODO: oben fragen ob multimedia verwendet werden soll. wenn ja dann hier auch folgendes machen.
-#Debian Mozilla team
-#wget http://mozilla.debian.net/pkg-mozilla-archive-keyring_1.0_all.deb;
-#dpkg --install pkg-mozilla-archive-keyring_1.0_all.deb
+	#TODO: oben fragen ob multimedia verwendet werden soll. wenn ja dann hier auch folgendes machen.
+	#Debian Mozilla team
+	#wget http://mozilla.debian.net/pkg-mozilla-archive-keyring_1.0_all.deb;
+	#dpkg --install pkg-mozilla-archive-keyring_1.0_all.deb
+
 	echo "updating..."
 	apt-get update
 	apt-get dist-upgrade
-if [[ $MODE_INTERACTIVE -eq 1 ]]; then
-	echo "going to install packages"
-	echo "do you want to take a look at the packages list?"
-	echo "y/n: "
-	read q
-	if [[ "$q" -eq "y" ]]; then
-		vim packages.lst
+
+	if [[ $MODE_INTERACTIVE -eq 1 ]]; then
+		echo "going to install packages"
+		echo "do you want to take a look at the packages list?"
+		echo "y/n: "
+		read q
+		if [[ "$q" -eq "y" ]]; then
+			vim packages.lst
+		fi
 	fi
-fi
+
 	echo "installing packages"
 	if [[ -e packages.lst ]]; then
 		apt-get install $(< packages.lst)
@@ -127,12 +142,12 @@ cd $DEST_FOLDER
 echo "cloning dotfiles..."
 git_clone $REPO_DOTFILES $DEST_DOTFILES
 bash $DEST_DOTFILES/setup.sh #warum geht exec nicht?
-done
+say_done
 
 echo "cloning vundle and setting up vim plugins depending on vimrc..."
 git_clone $REPO_VUNDLE $DEST_VUNDLE
 #su $USR -c "vim +BundleInstall +qall" #TODO: oder vor allen ein su? aufpassen wegen rechten!
-done
+say_done
 #TODO: oder zsh plugin vundle nutzen
 
 #TODO: mehrere gute themes holen und am schluss setzen lassen. themes und icons als liste und oben definieren damit andere user einfach waehlen koennen? .git dir rausloeschen?
