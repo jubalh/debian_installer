@@ -182,6 +182,7 @@ else
 fi
 
 #mouse cursor
+#https://github.com/jubalh/x11-cursor-collection
 
 #solarized theme for ls command
 git_clone $REPO_LS_COLORS $DEST_LS_COLORS
