@@ -122,7 +122,7 @@ if [[ $IS_ROOT -eq 1 ]]; then
 
 	echo "updating..."
 	apt-get update
-	apt-get dist-upgrade
+	apt-get -y dist-upgrade
 
 	if [[ $MODE_INTERACTIVE -eq 1 ]]; then
 		echo "going to install packages"
