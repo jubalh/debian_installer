@@ -51,12 +51,21 @@ function clean_up(){
 }
 
 function git_clone() {
-	git clone $1 $2
-	if [[ $? -ne 0 ]]; then
-		echo "error while cloning"
-		echo "$*"
-		exit 1
+	if [ -e $2 ]; then
+		if [ -d $2/.git]; then
+			git pull
+		else
+			echo "file already exists!"
+		fi
+	else
+		git clone $1 $2
+		if [[ $? -ne 0 ]]; then
+			echo "error while cloning"
+			echo "$*"
+			exit 1
+		fi
 	fi
+
 }
 
 function say_done() {
