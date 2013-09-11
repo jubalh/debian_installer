@@ -127,7 +127,7 @@ if [[ $IS_ROOT -eq 1 ]]; then
 
 	echo "installing packages"
 	if [[ -e packages.lst ]]; then
-		apt-get install $(< packages.lst)
+		apt-get -y install $(< packages.lst)
 	else
 		echo "packages.lst is missing"
 		exit 1
