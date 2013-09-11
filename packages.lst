@@ -3,7 +3,7 @@ xorg
 i3
 vim
 vim-gnome
-gdm
+gdm3
 scrot
 dmenu
 
@@ -14,6 +14,7 @@ gnome-mplayer
 fonts-inconsolata
 rxvt-unicode
 vifm
+tmux
 
 linuxlogo
 
@@ -40,4 +41,3 @@ iceweasel-vimperator
 iceweasel-noscript
 
 build-essential
-qtcreator
