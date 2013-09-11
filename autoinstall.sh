@@ -65,7 +65,6 @@ function git_clone() {
 			exit 1
 		fi
 	fi
-
 }
 
 function say_done() {
@@ -152,7 +151,6 @@ echo "cloning dotfiles..."
 if [[ -e $DEST_DOTFILES ]]; then
 	git_clone $REPO_DOTFILES $DEST_DOTFILES
 fi
-#else git update?
 bash $DEST_DOTFILES/setup.sh #warum geht exec nicht?
 say_done
 
@@ -160,7 +158,6 @@ echo "cloning vundle and setting up vim plugins depending on vimrc..."
 if [[ -e $DEST_DOTFILES ]]; then
 git_clone $REPO_VUNDLE $DEST_VUNDLE
 fi
-#else git update?
 #su $USR -c "vim +BundleInstall +qall" #TODO: oder vor allen ein su? aufpassen wegen rechten!
 say_done
 #TODO: oder zsh plugin vundle nutzen
