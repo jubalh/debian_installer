@@ -70,7 +70,7 @@ echo '######################'
 echo 'automatic setup script'
 echo '######################'
 
-check_root()
+check_root
 if [[ $IS_ROOT -eq 0 ]]; then
 	echo "going to install the config files and themes in your home directory"
 	echo "if you want to have them globally run this script as root"
@@ -140,12 +140,18 @@ mkdir -p $DEST_FOLDER
 cd $DEST_FOLDER
 
 echo "cloning dotfiles..."
-git_clone $REPO_DOTFILES $DEST_DOTFILES
+if [[ -e $DEST_DOTFILES ]]; then
+	git_clone $REPO_DOTFILES $DEST_DOTFILES
+fi
+#else git update?
 bash $DEST_DOTFILES/setup.sh #warum geht exec nicht?
 say_done
 
 echo "cloning vundle and setting up vim plugins depending on vimrc..."
+if [[ -e $DEST_DOTFILES ]]; then
 git_clone $REPO_VUNDLE $DEST_VUNDLE
+fi
+#else git update?
 #su $USR -c "vim +BundleInstall +qall" #TODO: oder vor allen ein su? aufpassen wegen rechten!
 say_done
 #TODO: oder zsh plugin vundle nutzen
